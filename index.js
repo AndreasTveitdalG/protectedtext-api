@@ -11,6 +11,8 @@ module.exports = class ProtectedTextApi {
 
         this.siteObj = {};
         this.dbversion = 0;
+
+        this.tabSepHash = CryptoJS.SHA512("-- tab separator --").toString();
     }
 
     async loadTabs() {
@@ -23,7 +25,8 @@ module.exports = class ProtectedTextApi {
         return this;
     }
 
-    async save(textToSave) {
+    async saveTabs(tabsToSave) {
+        const textToSave = tabsToSave.join(this.tabSepHash);
         const encript = String(textToSave + this.siteHash);
         var textEncrypted = await CryptoJS.AES.encrypt(encript, this.pass).toString();
 
@@ -59,9 +62,9 @@ module.exports = class ProtectedTextApi {
             .data['status'] == 'success';
     }
 
-    async view() {
+    async viewTabs() {
         try {
-            return this.rawtext;
+            return this.rawtext.split(this.tabSepHash);
         } catch (err) {
             throw new Error(err.message);
         }
